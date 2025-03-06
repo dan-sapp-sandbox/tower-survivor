@@ -6,8 +6,8 @@ export class Tree extends ex.Actor {
   constructor(pos: ex.Vector) {
     super({
       pos,
-      width: 48,
-      height: 48,
+      width: 40,
+      height: 50,
       color: ex.Color.Green,
       z: -1,
     });
@@ -21,8 +21,8 @@ export class Tree extends ex.Actor {
       grid: {
         rows: 3,
         columns: 11,
-        spriteWidth: 48,
-        spriteHeight: 48,
+        spriteWidth: 64,
+        spriteHeight: 80,
       },
     });
     const treeSprite = spriteSheet.getSprite(0, 0);

@@ -6,8 +6,7 @@ import { Resources } from "./resources";
 export class Level extends ex.Scene {
   score: number = 0;
   best: number = 0;
-  random = new ex.Random();
-  treeFactory = new TreeFactory(this, this.random, 1600);
+  treeFactory = new TreeFactory(this);
   player = new Player(this);
 
   startGameLabel = new ex.Label({

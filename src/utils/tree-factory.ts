@@ -6,39 +6,34 @@ export class TreeFactory {
   private timer: ex.Timer;
   constructor(
     private level: Level,
-    private random: ex.Random,
-    intervalMs: number,
   ) {
     this.timer = new ex.Timer({
-      interval: intervalMs,
-      repeats: true,
-      action: () => this.spawnPipes(),
+      interval: 100,
+      repeats: false,
+      action: () => this.spawnTrees(),
     });
     this.level.add(this.timer);
+    this.start();
   }
 
-  spawnPipes() {
-    const randomTreePositionY = this.random.floating(
-      0,
-      this.level.engine.screen.resolution.height,
-    );
-    const randomTreePositionX = this.random.floating(
-      0,
-      this.level.engine.screen.resolution.width,
-    );
-
-    const bottomPipe = new Tree(
-      ex.vec(
-        randomTreePositionX / 2,
-        randomTreePositionY,
-      ),
-    );
-    this.level.add(bottomPipe);
-
-    const topPipe = new Tree(
-      ex.vec(randomTreePositionX, randomTreePositionY / 2),
-    );
-    this.level.add(topPipe);
+  spawnTrees() {
+    let i;
+    for (i = 0; i < 10; i++) {
+      const newTree = new Tree(ex.vec(0, i * 80));
+      this.level.add(newTree);
+    }
+    for (i = 0; i < 10; i++) {
+      const newTree = new Tree(ex.vec(i * 80, 0));
+      this.level.add(newTree);
+    }
+    for (i = 0; i < 10; i++) {
+      const newTree = new Tree(ex.vec(i * 80, 475));
+      this.level.add(newTree);
+    }
+    for (i = 0; i < 10; i++) {
+      const newTree = new Tree(ex.vec(400, i * 80));
+      this.level.add(newTree);
+    }
   }
 
   start() {
