@@ -1,4 +1,3 @@
-"use client";
 import * as ex from "excalibur";
 import { Resources } from "./resources";
 import { Config } from "./config";
@@ -16,6 +15,7 @@ export class Player extends ex.Actor {
       pos: Config.PlayerStartPos,
       radius: 32,
       color: ex.Color.Yellow,
+      collisionType: ex.CollisionType.Active,
     });
   }
 
@@ -72,6 +72,9 @@ export class Player extends ex.Actor {
     this.graphics.add("leftVamp", this.leftVamp);
 
     this.graphics.use("startDown");
+
+    engine.currentScene.camera.strategy.lockToActor(this);
+    engine.currentScene.camera.strategy.limitCameraBounds(Config.WorldBounds);
 
     this.on("exitviewport", () => {
       this.level.triggerGameOver();
@@ -131,12 +134,24 @@ export class Player extends ex.Actor {
   }
 
   stop() {
-    this.playing = false;
     this.vel = ex.vec(0, 0);
     this.acc = ex.vec(0, 0);
   }
 
   override onCollisionStart(_self: ex.Collider): void {
-    this.level.triggerGameOver();
+    this.stop();
+    // this.level.triggerGameOver();
+  }
+
+  override onPreUpdate() {
+    // Keep player inside world bounds using Math.min() and Math.max()
+    this.pos.x = Math.max(
+      Config.WorldBounds.left,
+      Math.min(this.pos.x, Config.WorldBounds.right - this.width),
+    );
+    this.pos.y = Math.max(
+      Config.WorldBounds.top,
+      Math.min(this.pos.y, Config.WorldBounds.bottom - this.height),
+    );
   }
 }

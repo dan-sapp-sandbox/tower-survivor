@@ -1,13 +1,14 @@
 import * as ex from "excalibur";
 import { Player } from "./player";
-import { TreeFactory } from "./tree-factory";
+import { Config } from "./config";
+import { Tree } from "./tree";
+import { Enemy } from "./enemy";
 import { Resources } from "./resources";
 
 export class Level extends ex.Scene {
   score: number = 0;
   best: number = 0;
-  treeFactory = new TreeFactory(this);
-  player = new Player(this);
+  player: Player = new Player(this);
 
   startGameLabel = new ex.Label({
     text: "Tap to Start",
@@ -27,7 +28,7 @@ export class Level extends ex.Scene {
     y: 10,
     z: 2,
     font: new ex.Font({
-      size: 20,
+      size: 16,
       color: ex.Color.White,
     }),
   });
@@ -38,7 +39,7 @@ export class Level extends ex.Scene {
     y: 10,
     z: 2,
     font: new ex.Font({
-      size: 20,
+      size: 16,
       color: ex.Color.White,
       textAlign: ex.TextAlign.End,
     }),
@@ -49,9 +50,89 @@ export class Level extends ex.Scene {
     Resources.BackgroundMusic.play();
   }
 
-  override onInitialize(): void {
-    this.add(this.player);
+  makeTrees = (engine: ex.Engine) => {
+    function generateTreePosition(): ex.Vector {
+      let attempts = 0;
+      let pos: ex.Vector;
+      let collides: boolean;
 
+      do {
+        pos = new ex.Vector(
+          Math.random() * Config.WorldBounds.right,
+          Math.random() * Config.WorldBounds.bottom,
+        );
+
+        collides = engine.currentScene.actors.some((actor) => {
+          return (
+            actor.collider.bounds.intersect(
+              new ex.BoundingBox(pos.x, pos.y, pos.x + 64, pos.y + 80),
+            )
+          );
+        });
+
+        attempts++;
+      } while (collides && attempts < 10); // Limit retries to avoid infinite loops
+
+      return pos;
+    }
+
+    const treePool: Tree[] = [];
+    for (let i = 0; i < 500; i++) {
+      const pos = generateTreePosition();
+      const tree = new Tree(pos, 0);
+
+      tree.on("exitviewport", () => tree.hide());
+      tree.on("enterviewport", () => tree.graphics.opacity = 1);
+
+      treePool.push(tree);
+      engine.add(tree);
+    }
+  };
+
+  makeEnemies = (engine: ex.Engine) => {
+    function generateEnemyPosition(): ex.Vector {
+      let attempts = 0;
+      let pos: ex.Vector;
+      let collides: boolean;
+
+      do {
+        pos = new ex.Vector(
+          Math.random() * Config.WorldBounds.right,
+          Math.random() * Config.WorldBounds.bottom,
+        );
+
+        collides = engine.currentScene.actors.some((actor) => {
+          return (
+            actor.collider.bounds.intersect(
+              new ex.BoundingBox(pos.x - 10, pos.y - 10, pos.x - 10, pos.y - 10),
+            )
+          );
+        });
+
+        attempts++;
+      } while (collides && attempts < 10);
+
+      return pos;
+    }
+
+    const enemyPool: Enemy[] = [];
+    for (let i = 0; i < 500; i++) {
+      const pos = generateEnemyPosition();
+      const enemyType = Math.floor(Math.random() * 999) % 3
+      const enemySize = (Math.random() * Config.EnemySizeRange) + Config.EnemySizeMin
+      const enemy = new Enemy(pos, enemyType, enemySize);
+
+
+      enemy.on("exitviewport", () => enemy.hide());
+      enemy.on("enterviewport", () => enemy.graphics.opacity = 1);
+
+      enemyPool.push(enemy);
+      engine.add(enemy);
+    }
+  };
+
+  override onInitialize(engine: ex.Engine): void {
+    this.add(this.player);
     this.add(this.startGameLabel);
     this.add(this.scoreLabel);
     this.add(this.bestLabel);
@@ -64,7 +145,10 @@ export class Level extends ex.Scene {
       this.setBestScore(0);
     }
 
-    this.showStartInstructions();
+    this.makeTrees(engine);
+    this.makeEnemies(engine);
+
+    this.player.start();
   }
   incrementScore() {
     this.scoreLabel.text = `Score: ${++this.score}`;
@@ -79,16 +163,6 @@ export class Level extends ex.Scene {
     this.bestLabel.text = `Best: ${this.best}`;
   }
 
-  showStartInstructions() {
-    this.startGameLabel.graphics.isVisible = true;
-    this.engine.input.pointers.once("down", () => {
-      this.reset();
-
-      this.startGameLabel.graphics.isVisible = false;
-      this.player.start();
-    });
-  }
-
   reset() {
     this.player.reset();
     this.score = 0;
@@ -97,7 +171,7 @@ export class Level extends ex.Scene {
 
   triggerGameOver() {
     this.player.stop();
-    this.showStartInstructions();
+    this.player.reset();
     Resources.FailSound.play();
   }
 }

@@ -1,4 +1,3 @@
-"use client";
 import { Resources } from "./resources";
 
 export function initMuteButton() {
