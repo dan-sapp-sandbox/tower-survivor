@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.7",
+    "excalibur": "^0.30.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
