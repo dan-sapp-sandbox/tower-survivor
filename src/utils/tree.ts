@@ -2,17 +2,19 @@ import * as ex from "excalibur";
 import { Resources } from "./resources";
 
 export class Tree extends ex.Actor {
-  index: number;
-  constructor(pos: ex.Vector, index: number) {
+  treeType: number;
+  treeSize: number;
+  constructor(pos: ex.Vector, treeType: number, treeSize: number) {
     super({
       pos,
-      width: 30,
-      height: 50,
+      width: 64,
+      height: 78,
       color: ex.Color.Green,
       z: -1,
       collisionType: ex.CollisionType.Fixed,
     });
-    this.index = index;
+    this.treeType = treeType;
+    this.treeSize = treeSize;
     this.graphics.opacity = 1;
   }
 
@@ -31,7 +33,7 @@ export class Tree extends ex.Actor {
       grid: {
         rows: 3,
         columns: 11,
-        spriteWidth: 62,
+        spriteWidth: 64,
         spriteHeight: 78,
       },
       spacing: {
@@ -47,8 +49,11 @@ export class Tree extends ex.Actor {
         }
       }
     });
-    const treeSprite = spriteSheet.getSprite(this.index, 0);
 
+    const treeSprite = spriteSheet.getSprite(this.treeType, 0);
+
+    this.scale = new ex.Vector(this.treeSize, this.treeSize);
+    
     this.graphics.use(treeSprite);
   }
 }

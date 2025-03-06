@@ -65,13 +65,13 @@ export class Level extends ex.Scene {
         collides = engine.currentScene.actors.some((actor) => {
           return (
             actor.collider.bounds.intersect(
-              new ex.BoundingBox(pos.x, pos.y, pos.x + 64, pos.y + 80),
+              new ex.BoundingBox(pos.x, pos.y, pos.x + 64, pos.y + 78),
             )
           );
         });
 
         attempts++;
-      } while (collides && attempts < 10); // Limit retries to avoid infinite loops
+      } while (collides && attempts < 10);
 
       return pos;
     }
@@ -79,7 +79,9 @@ export class Level extends ex.Scene {
     const treePool: Tree[] = [];
     for (let i = 0; i < 500; i++) {
       const pos = generateTreePosition();
-      const tree = new Tree(pos, 0);
+      const treeType = Math.floor(Math.random() * 999) % 3
+      const treeSize = (Math.random() * Math.random() * Config.TreeSizeRange) + Config.TreeSizeMin
+      const tree = new Tree(pos, treeType, treeSize);
 
       tree.on("exitviewport", () => tree.hide());
       tree.on("enterviewport", () => tree.graphics.opacity = 1);
@@ -119,7 +121,7 @@ export class Level extends ex.Scene {
     for (let i = 0; i < 500; i++) {
       const pos = generateEnemyPosition();
       const enemyType = Math.floor(Math.random() * 999) % 3
-      const enemySize = (Math.random() * Config.EnemySizeRange) + Config.EnemySizeMin
+      const enemySize = (Math.random() * Math.random() * Math.random() * Config.EnemySizeRange) + Config.EnemySizeMin
       const enemy = new Enemy(pos, enemyType, enemySize);
 
 

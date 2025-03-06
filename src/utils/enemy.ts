@@ -70,26 +70,25 @@ export class Enemy extends ex.Actor {
         }
       }
     });
-    const walkSpeed = 200
     this.downWalk = ex.Animation.fromSpriteSheet(
       spriteSheet,
       ex.range(0, 7),
-      walkSpeed,
+      Config.EnemyAnimDuration,
     );
     this.upWalk = ex.Animation.fromSpriteSheet(
       spriteSheet,
       ex.range(8, 15),
-      walkSpeed,
+      Config.EnemyAnimDuration,
     );
     this.leftWalk = ex.Animation.fromSpriteSheet(
       spriteSheet,
       ex.range(16, 23),
-      walkSpeed,
+      Config.EnemyAnimDuration,
     );
     this.rightWalk = ex.Animation.fromSpriteSheet(
       spriteSheet,
       ex.range(24, 31),
-      walkSpeed,
+      Config.EnemyAnimDuration,
     );
     const enemySprite = spriteSheet.getSprite(this.enemyType, 0);
 
