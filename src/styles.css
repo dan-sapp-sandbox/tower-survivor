@@ -1,16 +1,11 @@
 html,
 body {
-  background-color: black;
-  margin: 0;
-  padding: 0;
   height: 100%;
-}
-
-body {
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 
 .ui {
   position: absolute;
