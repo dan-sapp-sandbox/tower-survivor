@@ -6,6 +6,9 @@ const WorldHeight = 6000;
 export const Config = {
   PlayerStartPos: ex.vec(WorldWidth / 2, WorldHeight / 2),
   PlayerVelocity: 150,
+  ProjectileSpeed: 400,
+  ProjectileRate: 1500,
+  ProjectileSize: .5,
   EnemyVelocity: 30,
   EnemySizeMin: 1.1,
   EnemySizeRange: 1.7,

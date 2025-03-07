@@ -2,6 +2,8 @@ import * as ex from "excalibur";
 import { Resources } from "./resources";
 import { Config } from "./config";
 import { Level } from "./level";
+import { Enemy } from "./enemy";
+import { Projectile } from "./projectile";
 
 export class Player extends ex.Actor {
   playing = false;
@@ -16,6 +18,28 @@ export class Player extends ex.Actor {
       radius: 32,
       color: ex.Color.Yellow,
       collisionType: ex.CollisionType.Active,
+    });
+  }
+
+  fireProjectile(engine: ex.Engine) {
+    const nearestEnemy = this.findNearestEnemy(engine);
+    if (nearestEnemy) {
+      const projectile = new Projectile(this.pos.clone(), nearestEnemy, Config.ProjectileSpeed);
+      engine.currentScene.add(projectile);
+    }
+  }
+
+  // Find the nearest enemy
+  findNearestEnemy(engine: ex.Engine): Enemy | null {
+    const enemies = engine.currentScene.actors.filter(actor => actor instanceof Enemy);
+    if (enemies.length === 0) {
+      return null;
+    }
+    // Find the closest enemy
+    return enemies.reduce((nearest, current) => {
+      const nearestDistance = this.pos.distance(nearest.pos);
+      const currentDistance = this.pos.distance(current.pos);
+      return currentDistance < nearestDistance ? current : nearest;
     });
   }
 
@@ -75,6 +99,8 @@ export class Player extends ex.Actor {
 
     engine.currentScene.camera.strategy.lockToActor(this);
     engine.currentScene.camera.strategy.limitCameraBounds(Config.WorldBounds);
+
+    setInterval(() => this.fireProjectile(engine), Config.ProjectileRate);
 
     this.on("exitviewport", () => {
       this.level.triggerGameOver();
@@ -139,6 +165,7 @@ export class Player extends ex.Actor {
   }
 
   override onCollisionStart(_self: ex.Collider): void {
+    //TODO: if not projectile
     this.stop();
     // this.level.triggerGameOver();
   }
