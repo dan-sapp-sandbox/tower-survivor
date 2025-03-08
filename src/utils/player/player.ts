@@ -3,7 +3,9 @@ import { Config } from "../config";
 import { Level } from "../level/level";
 import { Enemy } from "../enemy/enemy";
 import { Projectile } from "./projectile";
-import { generateAnimations } from "./animations";
+import { generateAnimations, updateAnimation } from "./animations";
+import { generateXpCounter } from "./xpCounter";
+import { generateHealthCounter } from "./health";
 
 export class Player extends ex.Actor {
   playing = false;
@@ -13,6 +15,9 @@ export class Player extends ex.Actor {
   rightVamp!: ex.Animation;
   lastKeyPressed!: ex.Keys;
   experience: number = 0;
+  xpLabel!: ex.Label;
+  health: number = 100;
+  healthLabel!: ex.Label;
   constructor(private level: Level) {
     super({
       pos: Config.PlayerStartPos,
@@ -23,26 +28,16 @@ export class Player extends ex.Actor {
     this.level = level
   }
 
-  updateXpDisplay = (xp: number) => {
-    this.xpLabel.text = `Experience: ${xp}`
-  }
-
-  xpText = new ex.ScreenElement({
-    x: 20,
-    y: 20,
-  });
-  xpLabel = new ex.Label({
-    text: `Experience: ${this.experience}`,
-    pos: ex.vec(0, 0),
-    font: new ex.Font({
-      size: 32,
-      color: ex.Color.White,
-    }),
-  });
-
   incrementXp = (newXp: number) => {
     this.experience += newXp;
     this.xpLabel.text = `Experience: ${this.experience}`
+  }
+  decrementHealth = (damage: number) => {
+    this.health -= damage;
+    this.healthLabel.text = `Health: ${this.health}`
+    if (this.health <= 0) {
+      this.level.triggerGameOver()
+    }
   }
 
   fireProjectile(engine: ex.Engine) {
@@ -72,9 +67,9 @@ export class Player extends ex.Actor {
     engine.input.keyboard.on("hold", (evt) => {
       this.lastKeyPressed = evt.key;
     });
-    
-    this.xpText.addChild(this.xpLabel);
-    this.level.add(this.xpText);
+
+    this.healthLabel = generateHealthCounter(this, this.level)
+    this.xpLabel = generateXpCounter(this, this.level)
     generateAnimations(this);
     this.graphics.use("playerIdleDown");
 
@@ -86,47 +81,6 @@ export class Player extends ex.Actor {
     this.on("exitviewport", () => {
       this.level.triggerGameOver();
     });
-  }
-
-  override onPostUpdate(engine: ex.Engine): void {
-    if (!this.playing) return;
-
-    if (engine.input.keyboard.isHeld(ex.Keys.S)) {
-      this.graphics.use("playerWalkDown");
-      this.vel.y = Config.PlayerVelocity;
-    } else if (engine.input.keyboard.isHeld(ex.Keys.W)) {
-      this.graphics.use("playerWalkUp");
-      this.vel.y = -Config.PlayerVelocity;
-    } else {
-      this.vel.y = 0;
-    }
-    if (engine.input.keyboard.isHeld(ex.Keys.D)) {
-      this.graphics.use("playerWalkRight");
-      this.vel.x = Config.PlayerVelocity;
-    } else if (engine.input.keyboard.isHeld(ex.Keys.A)) {
-      this.graphics.use("playerWalkLeft");
-      this.vel.x = -Config.PlayerVelocity;
-    } else {
-      this.vel.x = 0;
-    }
-    if (!this.vel.x && !this.vel.y) {
-      switch (this.lastKeyPressed) {
-        case ex.Keys.S:
-          this.graphics.use("playerIdleDown");
-          break;
-        case ex.Keys.W:
-          this.graphics.use("playerIdleUp");
-          break;
-        case ex.Keys.D:
-          this.graphics.use("playerIdleRight");
-          break;
-        case ex.Keys.A:
-          this.graphics.use("playerIdleLeft");
-          break;
-        default:
-          this.graphics.use("playerIdleDown");
-      }
-    }
   }
 
   start() {
@@ -145,7 +99,10 @@ export class Player extends ex.Actor {
     this.acc = ex.vec(0, 0);
   }
 
-  override onCollisionStart(_self: ex.Collider): void {
+  override onCollisionStart(_self: ex.Collider, other: ex.Collider): void {
+    if (other.owner instanceof Enemy) {
+      this.decrementHealth(5)
+    }
     this.stop();
   }
 
@@ -158,5 +115,10 @@ export class Player extends ex.Actor {
       Config.WorldBounds.top,
       Math.min(this.pos.y, Config.WorldBounds.bottom - this.height),
     );
+  }
+
+  override onPostUpdate(engine: ex.Engine): void {
+    if (!this.playing) return;
+    updateAnimation(this, engine);
   }
 }
