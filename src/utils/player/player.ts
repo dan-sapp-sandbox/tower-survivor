@@ -23,9 +23,26 @@ export class Player extends ex.Actor {
     this.level = level
   }
 
+  updateXpDisplay = (xp: number) => {
+    this.xpLabel.text = `Experience: ${xp}`
+  }
+
+  xpText = new ex.ScreenElement({
+    x: 20,
+    y: 20,
+  });
+  xpLabel = new ex.Label({
+    text: `Experience: ${this.experience}`,
+    pos: ex.vec(0, 0),
+    font: new ex.Font({
+      size: 32,
+      color: ex.Color.White,
+    }),
+  });
+
   incrementXp = (newXp: number) => {
     this.experience += newXp;
-    this.level.updateXpDisplay(this.experience)
+    this.xpLabel.text = `Experience: ${this.experience}`
   }
 
   fireProjectile(engine: ex.Engine) {
@@ -56,6 +73,8 @@ export class Player extends ex.Actor {
       this.lastKeyPressed = evt.key;
     });
     
+    this.xpText.addChild(this.xpLabel);
+    this.level.add(this.xpText);
     generateAnimations(this);
     this.graphics.use("playerIdleDown");
 
