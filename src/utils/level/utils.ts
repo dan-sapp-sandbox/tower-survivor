@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
-import { Config } from '../config'
-import { Tree } from '../tree'
+import { Config } from '../../config'
+import { Tree } from './tree'
 import { Enemy } from '../enemy/enemy';
 
 export const makeTrees = (engine: ex.Engine) => {
@@ -18,7 +18,7 @@ export const makeTrees = (engine: ex.Engine) => {
       collides = engine.currentScene.actors.some((actor) => {
         return (
           actor.collider.bounds.intersect(
-            new ex.BoundingBox(pos.x, pos.y, pos.x + 64, pos.y + 78),
+            new ex.BoundingBox(pos.x, pos.y, pos.x + 200, pos.y + 200),
           )
         );
       });

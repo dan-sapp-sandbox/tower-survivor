@@ -6,6 +6,7 @@ export const generateHealthCounter = (player: Player, level: Level) => {
   const healthText = new ex.ScreenElement({
     x: 20,
     y: 5,
+    z: 50
   });
   const healthLabel = new ex.Label({
     text: `Health: ${player.health}`,

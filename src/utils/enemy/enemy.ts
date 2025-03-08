@@ -1,6 +1,6 @@
 import * as ex from "excalibur";
 import { Player } from "../player/player";
-import { Config } from '../config'
+import { Config } from '../../config'
 import { generateAnimations } from './animations'
 
 export class Enemy extends ex.Actor {
@@ -17,7 +17,7 @@ export class Enemy extends ex.Actor {
       width: 1,
       height: 1,
       color: ex.Color.Green,
-      z: -1,
+      z: 5,
       collisionType: ex.CollisionType.Active
     });
     this.enemyType = enemyType;

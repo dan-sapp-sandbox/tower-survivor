@@ -1,6 +1,6 @@
 import * as ex from "excalibur";
 import { Enemy } from "./enemy";
-import { Config } from "../config";
+import { Config } from "../../config";
 import { Resources } from "../resources";
 
 export const generateAnimations = (self: Enemy) => {

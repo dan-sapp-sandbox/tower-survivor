@@ -1,10 +1,11 @@
 import * as ex from "excalibur";
-import { Config } from "../config";
+import { Config } from "../../config";
 import { Level } from "../level/level";
 import { Enemy } from "../enemy/enemy";
+import { Pickup } from "./pickup/pickup";
 import { Projectile } from "./projectile";
 import { generateAnimations, updateAnimation } from "./animations";
-import { generateXpCounter } from "./xpCounter";
+import { generateXpCounter } from "./xp-counter";
 import { generateHealthCounter } from "./health";
 
 export class Player extends ex.Actor {
@@ -16,7 +17,7 @@ export class Player extends ex.Actor {
   lastKeyPressed!: ex.Keys;
   experience: number = 0;
   xpLabel!: ex.Label;
-  health: number = 100;
+  health: number = Config.PlayerHealthMax;
   healthLabel!: ex.Label;
   constructor(private level: Level) {
     super({
@@ -37,13 +38,14 @@ export class Player extends ex.Actor {
     this.healthLabel.text = `Health: ${this.health}`
     if (this.health <= 0) {
       this.level.triggerGameOver()
+      this.health = Config.PlayerHealthMax
     }
   }
 
   fireProjectile(engine: ex.Engine) {
     const nearestEnemy = this.findNearestEnemy(engine);
     if (nearestEnemy) {
-      const projectile = new Projectile(this.pos.clone(), nearestEnemy, Config.ProjectileSpeed, this.incrementXp);
+      const projectile = new Projectile(this.pos.clone(), nearestEnemy, Config.ProjectileSpeed, this.incrementXp, engine);
       engine.currentScene.add(projectile);
     }
   }
@@ -102,6 +104,10 @@ export class Player extends ex.Actor {
   override onCollisionStart(_self: ex.Collider, other: ex.Collider): void {
     if (other.owner instanceof Enemy) {
       this.decrementHealth(5)
+    }
+    if (other.owner instanceof Pickup) {
+      this.incrementXp(7)
+      other.owner.kill()
     }
     this.stop();
   }

@@ -6,6 +6,7 @@ export const generateXpCounter = (player: Player, level: Level) => {
   const xpText = new ex.ScreenElement({
     x: 20,
     y: 25,
+    z: 50
   });
   const xpLabel = new ex.Label({
     text: `Experience: ${player.experience}`,

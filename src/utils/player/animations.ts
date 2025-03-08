@@ -1,7 +1,7 @@
 import * as ex from 'excalibur'
 import { Player } from "./player";
 import { Resources } from '../resources';
-import { Config } from '../config';
+import { Config } from '../../config';
 
 export const generateAnimations = (self: Player) => {
   const spriteSheet = ex.SpriteSheet.fromImageSource({

@@ -5,7 +5,7 @@ import App from "./App.tsx";
 import * as ex from "excalibur";
 import { Resources } from "./utils/resources";
 import { Level } from "./utils/level/level.ts";
-import { Config } from "./utils/config.ts";
+import { Config } from "./config.ts";
 import { initMuteButton } from "./utils/ui";
 
 const positionUI = (game: ex.Engine) => {

@@ -7,8 +7,16 @@ export const generatePauseScreen = (engine: ex.Engine) => {
   const togglePause = (isPaused: boolean) => {
     if (isPaused) {
       engine.clock.stop();
+      const pauseMenuElement = document.getElementById('pause-menu')
+      if (pauseMenuElement) {
+        pauseMenuElement.style.visibility = 'visible';
+      }
     } else {
       engine.clock.start();
+      const pauseMenuElement = document.getElementById('pause-menu')
+      if (pauseMenuElement) {
+        pauseMenuElement.style.visibility = 'hidden';
+      }
     }
   }
 

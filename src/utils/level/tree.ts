@@ -1,5 +1,5 @@
 import * as ex from "excalibur";
-import { Resources } from "./resources";
+import { Resources } from "../resources";
 
 export class Tree extends ex.Actor {
   treeType: number;
@@ -10,7 +10,7 @@ export class Tree extends ex.Actor {
       width: 64,
       height: 78,
       color: ex.Color.Green,
-      z: -1,
+      z: 25,
       collisionType: ex.CollisionType.Fixed,
     });
     this.treeType = treeType;
@@ -20,11 +20,11 @@ export class Tree extends ex.Actor {
 
   reset(pos: ex.Vector) {
     this.pos = pos;
-    this.graphics.opacity = 1; // Show when entering viewport
+    this.graphics.opacity = 1;
   }
 
   hide() {
-    this.graphics.opacity = 0; // Hide off-screen instead of removing
+    this.graphics.opacity = 0;
   }
 
   override onInitialize(): void {
@@ -37,12 +37,10 @@ export class Tree extends ex.Actor {
         spriteHeight: 78,
       },
       spacing: {
-        // pixels from the top left to start the sprite parsing
         originOffset: {
           x: 1,
           y: 0
         },
-        // pixels between each sprite while parsing
         margin: {
           x: 0,
           y: 0

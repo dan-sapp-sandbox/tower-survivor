@@ -3,6 +3,7 @@ import { Player } from "../player/player";
 import * as utils from './utils';
 import { Resources } from "../resources";
 import { generatePauseScreen } from './pause'
+import { generateFloor } from './floor'
 
 export class Level extends ex.Scene {
   player: Player = new Player(this);
@@ -14,6 +15,7 @@ export class Level extends ex.Scene {
 
   override onInitialize(engine: ex.Engine): void {
     generatePauseScreen(engine);
+    generateFloor(engine);
 
     this.add(this.player);
     utils.makeTrees(engine);
