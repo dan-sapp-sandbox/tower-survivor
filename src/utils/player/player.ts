@@ -1,9 +1,9 @@
 import * as ex from "excalibur";
-import { Resources } from "./resources";
-import { Config } from "./config";
-import { Level } from "./level";
-import { Enemy } from "./enemy";
+import { Config } from "../config";
+import { Level } from "../level/level";
+import { Enemy } from "../enemy/enemy";
 import { Projectile } from "./projectile";
+import { generateAnimations } from "./animations";
 
 export class Player extends ex.Actor {
   playing = false;
@@ -12,6 +12,7 @@ export class Player extends ex.Actor {
   leftVamp!: ex.Animation;
   rightVamp!: ex.Animation;
   lastKeyPressed!: ex.Keys;
+  experience: number = 0;
   constructor(private level: Level) {
     super({
       pos: Config.PlayerStartPos,
@@ -19,23 +20,27 @@ export class Player extends ex.Actor {
       color: ex.Color.Yellow,
       collisionType: ex.CollisionType.Active,
     });
+    this.level = level
+  }
+
+  incrementXp = (newXp: number) => {
+    this.experience += newXp;
+    this.level.updateXpDisplay(this.experience)
   }
 
   fireProjectile(engine: ex.Engine) {
     const nearestEnemy = this.findNearestEnemy(engine);
     if (nearestEnemy) {
-      const projectile = new Projectile(this.pos.clone(), nearestEnemy, Config.ProjectileSpeed);
+      const projectile = new Projectile(this.pos.clone(), nearestEnemy, Config.ProjectileSpeed, this.incrementXp);
       engine.currentScene.add(projectile);
     }
   }
 
-  // Find the nearest enemy
   findNearestEnemy(engine: ex.Engine): Enemy | null {
     const enemies = engine.currentScene.actors.filter(actor => actor instanceof Enemy);
     if (enemies.length === 0) {
       return null;
     }
-    // Find the closest enemy
     return enemies.reduce((nearest, current) => {
       const nearestDistance = this.pos.distance(nearest.pos);
       const currentDistance = this.pos.distance(current.pos);
@@ -50,52 +55,9 @@ export class Player extends ex.Actor {
     engine.input.keyboard.on("hold", (evt) => {
       this.lastKeyPressed = evt.key;
     });
-    const spriteSheet = ex.SpriteSheet.fromImageSource({
-      image: Resources.Vampire,
-      grid: {
-        rows: 4,
-        columns: 6,
-        spriteWidth: 64,
-        spriteHeight: 64,
-      },
-    });
-    const walkSpeed = 75;
-    this.downVamp = ex.Animation.fromSpriteSheet(
-      spriteSheet,
-      ex.range(0, 5),
-      walkSpeed,
-    );
-    this.upVamp = ex.Animation.fromSpriteSheet(
-      spriteSheet,
-      ex.range(6, 11),
-      walkSpeed,
-    );
-    this.leftVamp = ex.Animation.fromSpriteSheet(
-      spriteSheet,
-      ex.range(12, 17),
-      walkSpeed,
-    );
-    this.rightVamp = ex.Animation.fromSpriteSheet(
-      spriteSheet,
-      ex.range(18, 23),
-      walkSpeed,
-    );
-    const startDownSprite = spriteSheet.getSprite(0, 0);
-    const startUpSprite = spriteSheet.getSprite(0, 1);
-    const startLeftSprite = spriteSheet.getSprite(0, 2);
-    const startRightSprite = spriteSheet.getSprite(0, 3);
-
-    // Register
-    this.graphics.add("startDown", startDownSprite);
-    this.graphics.add("startUp", startUpSprite);
-    this.graphics.add("startRight", startRightSprite);
-    this.graphics.add("startLeft", startLeftSprite);
-    this.graphics.add("downVamp", this.downVamp);
-    this.graphics.add("upVamp", this.upVamp);
-    this.graphics.add("rightVamp", this.rightVamp);
-    this.graphics.add("leftVamp", this.leftVamp);
-
-    this.graphics.use("startDown");
+    
+    generateAnimations(this);
+    this.graphics.use("playerIdleDown");
 
     engine.currentScene.camera.strategy.lockToActor(this);
     engine.currentScene.camera.strategy.limitCameraBounds(Config.WorldBounds);
@@ -111,19 +73,19 @@ export class Player extends ex.Actor {
     if (!this.playing) return;
 
     if (engine.input.keyboard.isHeld(ex.Keys.S)) {
-      this.graphics.use("downVamp");
+      this.graphics.use("playerWalkDown");
       this.vel.y = Config.PlayerVelocity;
     } else if (engine.input.keyboard.isHeld(ex.Keys.W)) {
-      this.graphics.use("upVamp");
+      this.graphics.use("playerWalkUp");
       this.vel.y = -Config.PlayerVelocity;
     } else {
       this.vel.y = 0;
     }
     if (engine.input.keyboard.isHeld(ex.Keys.D)) {
-      this.graphics.use("rightVamp");
+      this.graphics.use("playerWalkRight");
       this.vel.x = Config.PlayerVelocity;
     } else if (engine.input.keyboard.isHeld(ex.Keys.A)) {
-      this.graphics.use("leftVamp");
+      this.graphics.use("playerWalkLeft");
       this.vel.x = -Config.PlayerVelocity;
     } else {
       this.vel.x = 0;
@@ -131,19 +93,19 @@ export class Player extends ex.Actor {
     if (!this.vel.x && !this.vel.y) {
       switch (this.lastKeyPressed) {
         case ex.Keys.S:
-          this.graphics.use("startDown");
+          this.graphics.use("playerIdleDown");
           break;
         case ex.Keys.W:
-          this.graphics.use("startUp");
+          this.graphics.use("playerIdleUp");
           break;
         case ex.Keys.D:
-          this.graphics.use("startRight");
+          this.graphics.use("playerIdleRight");
           break;
         case ex.Keys.A:
-          this.graphics.use("startLeft");
+          this.graphics.use("playerIdleLeft");
           break;
         default:
-          this.graphics.use("startDown");
+          this.graphics.use("playerIdleDown");
       }
     }
   }
@@ -165,13 +127,10 @@ export class Player extends ex.Actor {
   }
 
   override onCollisionStart(_self: ex.Collider): void {
-    //TODO: if not projectile
     this.stop();
-    // this.level.triggerGameOver();
   }
 
   override onPreUpdate() {
-    // Keep player inside world bounds using Math.min() and Math.max()
     this.pos.x = Math.max(
       Config.WorldBounds.left,
       Math.min(this.pos.x, Config.WorldBounds.right - this.width),

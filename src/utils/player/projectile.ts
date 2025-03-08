@@ -1,13 +1,14 @@
 import * as ex from "excalibur";
-import { Resources } from "./resources";
-import { Enemy } from "./enemy";
-import { Config } from "./config";
+import { Resources } from "../resources";
+import { Enemy } from "../enemy/enemy";
+import { Config } from "../config";
 
 export class Projectile extends ex.Actor {
   target: Enemy;
   speed: number;
+  incrementXp: (xp: number) => void;
 
-  constructor(pos: ex.Vector, target: Enemy, speed: number) {
+  constructor(pos: ex.Vector, target: Enemy, speed: number, incrementXp: (xp: number) => void) {
     super({
       pos,
       width: 30,
@@ -18,6 +19,7 @@ export class Projectile extends ex.Actor {
     });
     this.target = target;
     this.speed = speed;
+    this.incrementXp = incrementXp;
   }
 
   override onInitialize() {
@@ -55,6 +57,7 @@ export class Projectile extends ex.Actor {
     if (other.owner instanceof Enemy) {
       this.kill();
       this.target.kill();
+      this.incrementXp(this.target.xp)
     }
   }
 }

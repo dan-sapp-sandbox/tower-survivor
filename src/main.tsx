@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import * as ex from "excalibur";
 import { Resources } from "./utils/resources";
-import { Level } from "./utils/level";
+import { Level } from "./utils/level/level.ts";
 import { Config } from "./utils/config.ts";
 import { initMuteButton } from "./utils/ui";
 
@@ -35,6 +35,10 @@ const game = new ex.Engine({
 const loader = new ex.Loader(Object.values(Resources));
 
 game.start(loader).then(() => {
+  const startButton = document.getElementById("excalibur-play-root")
+  if (startButton) {
+    startButton.style.visibility = 'hidden';
+  }
   game.goToScene("Level");
   positionUI(game);
   initMuteButton();
